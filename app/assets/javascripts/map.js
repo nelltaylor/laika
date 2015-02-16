@@ -178,6 +178,12 @@ var InfoBox = function(attraction, marker){
                       '<p>' +
                       attraction.name +
                       '</p>' +
+                      '<p> Rating: ' +
+                      attraction.rating +
+                      '</p>' +
+                      '<p> Number of Reviews: ' +
+                      attraction.review_count +
+                      '</p>' +
                       '</div>',
   this.popup = new google.maps.InfoWindow({content: this.contentString});
   this.addClickListener(marker);
@@ -199,10 +205,3 @@ google.maps.event.addDomListener(window, "resize", function() {
     google.maps.event.trigger(map, "resize");
     map.setCenter(center);
   });
-
-$(document).ready(function() {
-  $(".get_route > form").on("submit", function(event) {
-    event.preventDefault();
-    new Route($("#from").val(), $("#to").val());
-  });
-});
