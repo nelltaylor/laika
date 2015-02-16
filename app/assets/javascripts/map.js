@@ -1,4 +1,5 @@
 //= require polyline
+var map;
 
 var directionsService = new google.maps.DirectionsService();
 
@@ -12,17 +13,18 @@ function initialize() {
 
   map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
   directionsDisplay.setMap(map);
-  route = new Route();
-  route.calculateRoute();
+  // route = new Route();
+  // route.calculateRoute();
 
 }
 
 //-------Route----------
 
-var Route = function(){
-  this.start = new google.maps.LatLng(41.953819, -87.654750), // Chicago for now
-  this.end = new google.maps.LatLng(38.637548, -90.205010), // St. Louis for now
+var Route = function(from, to){
+  this.start = from;
+  this.end = to;
   this.waypts = this.getWaypoints();
+  this.calculateRoute();
 };
 
 Route.prototype.getWaypoints = function(){
@@ -30,7 +32,7 @@ Route.prototype.getWaypoints = function(){
   var checkboxArray = document.getElementById('waypoints');
 
   for (var i = 0; i < checkboxArray.length; i++) {
-    if (checkboxArray.options[i].selected == true) {
+    if (checkboxArray.options[i].selected === true) {
       waypts.push({
         location: checkboxArray[i].value,
         stopover: true});
@@ -52,10 +54,10 @@ Route.prototype.calculateRoute = function(){
   directionsService.route(request, function(response, status){
     if (status == google.maps.DirectionsStatus.OK) {
 
-      decoder = new PolylineDecoder()
+      decoder = new PolylineDecoder();
       route.polyline = decoder.decodePolyline(response);
-      polygon = new Polygon(route.polyline)
-      route.displayRoute(response, true)
+      polygon = new Polygon(route.polyline);
+      route.displayRoute(response, true);
     }
   });
 };
@@ -69,27 +71,27 @@ Route.prototype.displayRoute = function(response, drawMe){
   if (drawMe) {
     drawer = new Drawer();
     drawer.draw(polygon.geoJson);
-  };
-}
+  }
+};
 
 
 //----polyline decoder-----
 
-var PolylineDecoder = function(response){}
+var PolylineDecoder = function(response){};
 
 PolylineDecoder.prototype.decodePolyline = function(response){
   var coord_array = polyline.decode(response.routes[0].overview_polyline);
   return coord_array.map(function(coordinate) {
     return [coordinate[1], coordinate[0]];
-  })
-}
+  });
+};
 
 //-------Polygon!------------
 
 var Polygon = function(polyline){
-  this.geoJson = this.createGeoJsonFromPolyline(polyline)
-  this.searchWithin(this.geoJson)
-}
+  this.geoJson = this.createGeoJsonFromPolyline(polyline);
+  this.searchWithin(this.geoJson);
+};
 
 Polygon.prototype.createGeoJsonFromPolyline = function(polyline) {
   var line = {
@@ -98,11 +100,11 @@ Polygon.prototype.createGeoJsonFromPolyline = function(polyline) {
       type:"LineString",
       coordinates: polyline
      }
-   }
+   };
 
-  var polygon = turf.buffer(line, 25, 'miles')
-  return polygon
-}
+  var polygon = turf.buffer(line, 25, 'miles');
+  return polygon;
+};
 
 Polygon.prototype.searchWithin = function(polygon){
   $.ajax({
@@ -114,26 +116,26 @@ Polygon.prototype.searchWithin = function(polygon){
   data: JSON.stringify(polygon),
 })
   .success(function(response){
-    loadMarkers(response.attractions)
-  })
-}
+    loadMarkers(response.attractions);
+  });
+};
 
 //---------Draw-er---------------------
-var Drawer = function(){}
+var Drawer = function(){};
 
 Drawer.prototype.createLatLongObjects = function(geoJsonObject){
-  var latLongArray = []
-  var coordArray = geoJsonObject.features[0].geometry.coordinates[0]
+  var latLongArray = [];
+  var coordArray = geoJsonObject.features[0].geometry.coordinates[0];
 
   coordArray.forEach(function(coord){
-    latLongArray.push(new google.maps.LatLng(coord[1], coord[0]))
-    return latLongArray
-  })
-  return latLongArray
-}
+    latLongArray.push(new google.maps.LatLng(coord[1], coord[0]));
+    return latLongArray;
+  });
+  return latLongArray;
+};
 
 Drawer.prototype.draw = function(geoJsonObject){
-  var coordsToDraw = this.createLatLongObjects(geoJsonObject)
+  var coordsToDraw = this.createLatLongObjects(geoJsonObject);
 
     bufferedPolygon = new google.maps.Polygon({
     paths: coordsToDraw,
@@ -145,7 +147,7 @@ Drawer.prototype.draw = function(geoJsonObject){
   });
   bufferedPolygon.setMap(map);
 
-}
+};
 
 //------------Markers----------------
 
@@ -167,7 +169,7 @@ function loadMarker(attraction){
     map: map
   });
 
-  new InfoBox(attraction, marker)
+  new InfoBox(attraction, marker);
 }
 
 //-----------InfoBox----------------
@@ -178,15 +180,15 @@ var InfoBox = function(attraction, marker){
                       '</p>' +
                       '</div>',
   this.popup = new google.maps.InfoWindow({content: this.contentString});
-  this.addClickListener(marker)
-}
+  this.addClickListener(marker);
+};
 
 InfoBox.prototype.addClickListener = function(marker){
-  var myThis = this
+  var myThis = this;
   google.maps.event.addDomListener(marker, 'click', function(){
     myThis.popup.open(map, marker);
   });
-}
+};
 
 //------------misc DOM operations-------------------
 
@@ -197,3 +199,10 @@ google.maps.event.addDomListener(window, "resize", function() {
     google.maps.event.trigger(map, "resize");
     map.setCenter(center);
   });
+
+$(document).ready(function() {
+  $(".get_route > form").on("submit", function(event) {
+    event.preventDefault();
+    new Route($("#from").val(), $("#to").val());
+  });
+});
