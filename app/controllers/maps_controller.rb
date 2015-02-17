@@ -3,6 +3,8 @@ class MapsController < ApplicationController
   respond_to :json
 
   def index
+    @start = [42.013157, -87.662274]
+    @end = [41.709978, -87.589064]
   end
 
   # def search

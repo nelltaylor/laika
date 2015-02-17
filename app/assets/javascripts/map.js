@@ -15,7 +15,7 @@ function initialize() {
 
   map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
   directionsDisplay.setMap(map);
-  route = new Route();
+  route = new Route(START, END);
   // route.calculateRoute();
 
 }
@@ -23,8 +23,8 @@ function initialize() {
 //-------Route----------
 
 var Route = function(start, end, waypts){
-  this.start = start || new google.maps.LatLng(42.013157, -87.662274), // toughy
-  this.end = end || new google.maps.LatLng(41.709978, -87.589064), // pullman
+  this.start = start; //|| new google.maps.LatLng(42.013157, -87.662274), // toughy
+  this.end = end; //|| new google.maps.LatLng(41.709978, -87.589064), // pullman
   this.waypts = waypts || []
 
   this.calculateRoute();
