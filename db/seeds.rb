@@ -22,6 +22,8 @@ def seed_user
   end
 end
 
+# Pick a route
+
 def seed_locations
   # seed cities
   CSV.foreach('db/major-us-cities.csv', headers: true) do |row|
@@ -48,8 +50,16 @@ def has_location?(business)
   business.respond_to?(:location) && business.location.respond_to?(:coordinate)
 end
 
+def has_categories?(business)
+  business.respond_to?(:categories)
+end
+
+def has_website?(business)
+  business.respond_to?(:url)
+end
+
 def seed_attractions
-  Location.all[0..10].each do |location|
+  Location.where(city: 'Chicago').each do |location|
     Category.each do |category|
 
       # check if you have already requested Yelp for this location and category
@@ -63,7 +73,7 @@ def seed_attractions
                category_filter: category.subcategory_code,
                  radius_filter: 40000 })
 
-        result.businesses.select { |business| has_location?(business) }.each do |business|
+        result.businesses.select { |business| has_location?(business) && has_categories?(business) && has_website?(business) }.each do |business|
           a = Attraction.find_or_initialize_by(yelp_id: business.id)
           a.update_attributes(name: business.name,
                             rating: business.rating,
@@ -73,6 +83,9 @@ def seed_attractions
                                     },
                       review_count: business.review_count,
                           location: location,
+                          yelp_categories: business.categories,
+                          yelp_url: business.url,
+                          yelp_mobile_url: business.mobile_url
                         )
           a.categories.push(category) unless a.categories.include?(category)
           a.save!
@@ -87,13 +100,13 @@ def seed_attractions
 end
 
 Yelp.client.configure do |config|
-  config.consumer_key = YELP['yelp_consumer_key']
-  config.consumer_secret = YELP['yelp_consumer_secret']
-  config.token = YELP['yelp_token']
-  config.token_secret = YELP['yelp_token_secret']
+  config.consumer_key = API_KEYS['yelp_consumer_key']
+  config.consumer_secret = API_KEYS['yelp_consumer_secret']
+  config.token = API_KEYS['yelp_token']
+  config.token_secret = API_KEYS['yelp_token_secret']
 end
 
-seed_user
 seed_locations
 seed_categories
 seed_attractions
+seed_user

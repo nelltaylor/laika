@@ -120,6 +120,7 @@ Polygon.prototype.searchWithin = function(polygon){
   });
 };
 
+
 //---------Draw-er---------------------
 var Drawer = function(){};
 
@@ -152,7 +153,6 @@ Drawer.prototype.draw = function(geoJsonObject){
 //------------Markers----------------
 
 function loadMarkers(attractions){
-
     $.each(attractions, function(i,item){
       loadMarker(item);
     });
@@ -169,7 +169,11 @@ function loadMarker(attraction){
     map: map
   });
 
+<<<<<<< HEAD
   new InfoBox(attraction, marker);
+=======
+  new InfoBox(attraction, marker)
+  loadAttractionList(attraction, marker)
 }
 
 //-----------InfoBox----------------
@@ -177,6 +181,9 @@ var InfoBox = function(attraction, marker){
   this.contentString ='<div>' +
                       '<p>' +
                       attraction.name +
+                      '</p>' +
+                      '<p> Interest Areas: ' +
+                      // attraction.yelp_categories[0][0] +
                       '</p>' +
                       '<p> Rating: ' +
                       attraction.rating +
