@@ -1,9 +1,14 @@
 //= require polyline
-var map;
 
-var directionsService = new google.maps.DirectionsService();
+var map, directionsService, directionsDisplay;
 
-function initialize() {
+function start(event) {
+  event.preventDefault();
+  var start = $("#from").val();
+  var end = $("#to").val();
+
+  directionsService = new google.maps.DirectionsService();
+
   directionsDisplay = new google.maps.DirectionsRenderer();
 
   var mapOptions = {
@@ -11,35 +16,27 @@ function initialize() {
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
-  map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+  $('.home_container').hide();
+  map = new google.maps.Map(document.getElementById('.content_container'), mapOptions);
   directionsDisplay.setMap(map);
-  // route = new Route();
+  route = new Route(start, end);
   // route.calculateRoute();
-
 }
+
+function onPageLoaded() {
+  $(".get_route > form").on("submit", start);
+}
+
+
 
 //-------Route----------
 
-var Route = function(from, to){
-  this.start = from;
-  this.end = to;
-  this.waypts = this.getWaypoints();
+var Route = function(start, end, waypts){
+  this.start = start || new google.maps.LatLng(42.013157, -87.662274), // toughy
+  this.end = end || new google.maps.LatLng(41.709978, -87.589064), // pullman
+  this.waypts = waypts || []
+
   this.calculateRoute();
-};
-
-Route.prototype.getWaypoints = function(){
-  var waypts = [];
-  var checkboxArray = document.getElementById('waypoints');
-
-  for (var i = 0; i < checkboxArray.length; i++) {
-    if (checkboxArray.options[i].selected === true) {
-      waypts.push({
-        location: checkboxArray[i].value,
-        stopover: true});
-    }
-  }
-
-  return waypts;
 };
 
 Route.prototype.calculateRoute = function(){
@@ -50,7 +47,7 @@ Route.prototype.calculateRoute = function(){
     optimizeWaypoints: true,
     travelMode: google.maps.TravelMode.DRIVING
   };
-
+  console.log(this.waypts)
   directionsService.route(request, function(response, status){
     if (status == google.maps.DirectionsStatus.OK) {
 
@@ -169,11 +166,8 @@ function loadMarker(attraction){
     map: map
   });
 
-<<<<<<< HEAD
-  new InfoBox(attraction, marker);
-=======
   new InfoBox(attraction, marker)
-  loadAttractionList(attraction, marker)
+  new Attraction(attraction, marker, route)
 }
 
 //-----------InfoBox----------------
@@ -205,7 +199,7 @@ InfoBox.prototype.addClickListener = function(marker){
 
 //------------misc DOM operations-------------------
 
-google.maps.event.addDomListener(window, 'load', initialize);
+google.maps.event.addDomListener(window, 'load', onPageLoaded);
 
 google.maps.event.addDomListener(window, "resize", function() {
     var center = map.getCenter();

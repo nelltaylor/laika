@@ -5,11 +5,11 @@ class MapsController < ApplicationController
   def index
   end
 
-  # def search
-  #   geometry = params['features'][0]['geometry']
-  #   @attractions = Attraction.search_within(geometry).all.to_a
-  #   render json: { attractions: @attractions }
-  # end
+  def display
+  end
+
+  def start_trip
+  end
 
   def search
     geometry = params['features'][0]['geometry']
@@ -22,8 +22,7 @@ class MapsController < ApplicationController
     render json: { attractions: @attractions }
   end
 
-  def directions
-  end
+
 
 end
 

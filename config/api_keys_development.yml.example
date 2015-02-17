@@ -1,0 +1,6 @@
+development:
+  yelp_consumer_key:    'YOUR_CONSUMER_KEY'
+  yelp_consumer_secret: 'YOUR_CONSUMER_SECRET'
+  yelp_token:           'YOUR_TOKEN'
+  yelp_token_secret:    'YOUR_TOKEN_SECRET'
+  google_key:           'YOUR_GOOGLE_KEY'
